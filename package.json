@@ -1,0 +1,24 @@
+{
+  "name": "node-addon-clipboard-auto",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xiekun1992/node-addon-clipboard-auto.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/xiekun1992/node-addon-clipboard-auto/issues"
+  },
+  "homepage": "https://github.com/xiekun1992/node-addon-clipboard-auto#readme",
+  "devDependencies": {
+    "node-addon-api": "^3.0.2",
+    "node-gyp": "^7.1.0"
+  }
+}
