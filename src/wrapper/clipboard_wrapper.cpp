@@ -18,7 +18,6 @@ namespace Clipboard {
     return Napi::Boolean::New(env, result);
   }
   Napi::String readText(const Napi::CallbackInfo& info) {
-    std::cout << clipboard.read_text() << std::endl;
     return Napi::String::New(info.Env(), clipboard.read_text());
   }
   Napi::Boolean writeFiles(const Napi::CallbackInfo& info) {
