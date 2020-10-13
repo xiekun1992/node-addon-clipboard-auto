@@ -14,13 +14,13 @@
 namespace clipboard_auto {
   class Clipboard {
     public:
-      Clipboard(std::function<void()> const& lambda);
+      Clipboard();
       ~Clipboard();
       bool write_text(std::string text);
       std::string read_text();
       bool write_files(std::vector<std::wstring> files);
       std::vector<std::wstring> read_files();
-      void capture();
+      void capture(std::function<void()> const& lambda);
       void release();
   };
 }

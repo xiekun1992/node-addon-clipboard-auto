@@ -27,12 +27,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 }
 
 namespace clipboard_auto {
-  Clipboard::Clipboard(std::function<void()> const& lambda) {
-    lambda_update_handler = lambda;
-  }
-  Clipboard::~Clipboard() {
-
-  }
+  Clipboard::Clipboard() {}
+  Clipboard::~Clipboard() {}
   bool Clipboard::write_text(std::string text) {
     HGLOBAL clipbuffer = GlobalAlloc(GMEM_DDESHARE, text.size() + 1);
     if (clipbuffer != NULL) {
@@ -109,8 +105,10 @@ namespace clipboard_auto {
     }
     return filenames;
   }
-  void Clipboard::capture() {
-    const wchar_t CLASS_NAME[] = L"Clipboard Window Class";
+  void Clipboard::capture(std::function<void()> const& lambda) {
+    lambda_update_handler = lambda;
+    
+    LPSTR CLASS_NAME = "Clipboard Window Class";
 
     HINSTANCE hInstance = GetModuleHandle(0);
     WNDCLASS wc = { };
@@ -122,7 +120,7 @@ namespace clipboard_auto {
     HWND hwnd = CreateWindowEx(
       0,                              // Optional window styles.
       CLASS_NAME,                     // Window class
-      L"Clipboard Listener Windows",    // Window text
+      "Clipboard Listener Windows",    // Window text
       WS_OVERLAPPEDWINDOW,            // Window style
       // Size and position
       CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,

@@ -17,7 +17,7 @@ namespace Clipboard {
     return Napi::Boolean::New(env, result);
   }
   Napi::String readText(const Napi::CallbackInfo& info) {
-    return Napi::String::New(env, clipboard.read_text());
+    return Napi::String::New(info.Env(), clipboard.read_text());
   }
   Napi::Boolean writeFiles(const Napi::CallbackInfo& info) {
     Napi::Env env = info.Env();
@@ -29,7 +29,7 @@ namespace Clipboard {
     }
     std::vector<std::wstring> filenames;
     Napi::Array files = info[0].As<Napi::Array>();
-    for (int i = 0; i < files.Length(); i++) {
+    for (unsigned int i = 0; i < files.Length(); i++) {
       Napi::Value path = files[i];
       if (path.IsString()) {
         std::u16string str16 = path.As<Napi::String>().Utf16Value();
@@ -41,17 +41,19 @@ namespace Clipboard {
     return Napi::Boolean::New(env, result);
   }
   Napi::Array readFiles(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
     std::vector<std::wstring> files = clipboard.read_files();
     Napi::Array fileArray = Napi::Array::New(env, files.size());
     int index = 0;
     for (auto& file : files) {
       std::u16string str(file.begin(), file.end());
-      fileArray[i++] = Napi::String::New(env, str);
+      fileArray[index++] = Napi::String::New(env, str);
     }
     return fileArray;
   }
   Napi::Value capture(const Napi::CallbackInfo& info) {
-    clipboard.capture();
+    // clipboard.capture();
+    return info.Env().Undefined();
   }
   Napi::Object initMethods(Napi::Env env, Napi::Object exports) {
     exports.Set("writeText", Napi::Function::New(env, Clipboard::writeText));
