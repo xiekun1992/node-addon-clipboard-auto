@@ -12,6 +12,7 @@ namespace Clipboard {
   Napi::Boolean writeFiles(const Napi::CallbackInfo& info);
   Napi::Array readFiles(const Napi::CallbackInfo& info);
   Napi::Value capture(const Napi::CallbackInfo& info);
+  Napi::Value release(const Napi::CallbackInfo& info);
   Napi::Object initMethods(Napi::Env env, Napi::Object exports);
 }
 

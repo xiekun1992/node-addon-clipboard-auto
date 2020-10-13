@@ -30,6 +30,8 @@ namespace clipboard_auto {
   Clipboard::Clipboard() {}
   Clipboard::~Clipboard() {}
   bool Clipboard::write_text(std::string text) {
+    OpenClipboard(0);
+
     HGLOBAL clipbuffer = GlobalAlloc(GMEM_DDESHARE, text.size() + 1);
     if (clipbuffer != NULL) {
       char* buffer = (char*)GlobalLock(clipbuffer);
@@ -38,12 +40,17 @@ namespace clipboard_auto {
         EmptyClipboard();
         SetClipboardData(CF_TEXT, clipbuffer);
         GlobalUnlock(clipbuffer);
+
+        CloseClipboard();
         return true;
       }
     }
+    CloseClipboard();
     return false;
   }
   std::string Clipboard::read_text() {
+    OpenClipboard(0);
+
     std::string empty = "";
     if (!IsClipboardFormatAvailable(CF_UNICODETEXT) && !IsClipboardFormatAvailable(CF_TEXT)) return empty;
 
@@ -53,38 +60,48 @@ namespace clipboard_auto {
         char* buffer = (char*)GetClipboardData(CF_TEXT);
         std::string text(buffer, buffer + strlen(buffer));
         GlobalUnlock(handle);
+
+        CloseClipboard();
         return text;
       }
     }
+    CloseClipboard();
     return empty;
   }
-  bool Clipboard::write_files(std::vector<std::wstring> files) {
-    std::wstring sFiles; // 对文件名以双字节存放
-    for (std::wstring file : files) {
+  bool Clipboard::write_files(std::vector<std::u16string> files) {
+    OpenClipboard(0);
+
+    std::u16string sFiles; // 对文件名以双字节存放
+    for (std::u16string file : files) {
       sFiles += file;
       sFiles.push_back(0); // 追加'\0'
     }
 
     DROPFILES dobj = { 20, { 0, 0 }, 0, 1 };
-    int nLen = sFiles.size()+1;
-    int nGblLen = sizeof(dobj) + nLen * sizeof(wchar_t);
+    int nLen = (sFiles.size() + 1) * sizeof(char16_t);
+    int nGblLen = sizeof(dobj) + nLen;
     
     HGLOBAL hGbl = GlobalAlloc(GMEM_ZEROINIT | GMEM_MOVEABLE | GMEM_DDESHARE, nGblLen);
     if (hGbl != NULL) {
       char* buffer = (char*)GlobalLock(hGbl);
       if (buffer != NULL) {
         memcpy(buffer, &dobj, sizeof(dobj));
-        memcpy(buffer + sizeof(dobj), sFiles.c_str(), nLen * sizeof(wchar_t));
+        memcpy(buffer + sizeof(dobj), sFiles.c_str(), nLen);
         EmptyClipboard();
         SetClipboardData(CF_HDROP, hGbl);
         GlobalUnlock(hGbl);
+
+        CloseClipboard();
         return true;
       }
     }
+    CloseClipboard();
     return false;
   }
-  std::vector<std::wstring> Clipboard::read_files() {
-    std::vector<std::basic_string<wchar_t>> filenames;
+  std::vector<std::u16string> Clipboard::read_files() {
+    OpenClipboard(0);
+
+    std::vector<std::basic_string<char16_t>> filenames;
     if (!IsClipboardFormatAvailable(CF_HDROP)) return filenames;
 
     HGLOBAL hClipboardText = (HGLOBAL)GetClipboardData(CF_HDROP);
@@ -93,22 +110,25 @@ namespace clipboard_auto {
       if (h != NULL) {
         int fileCount = DragQueryFile(h, 0xFFFFFFFF, nullptr, 0);
         for (int i = 0; i < fileCount; i++) {
-          std::basic_string<wchar_t> str;
+          std::basic_string<char16_t> str;
           filenames.push_back(str);
           int filenameLength = DragQueryFile(h, i, nullptr, 0);
           filenames[i].reserve(filenameLength);
-          DragQueryFile(h, i, &(filenames[i][0]), filenameLength + 1);
+          DragQueryFile(h, i, (LPWSTR)&(filenames[i][0]), filenameLength + 1);
         }
         GlobalUnlock(hClipboardText);
+
+        CloseClipboard();
         return filenames;
       }
     }
+    CloseClipboard();
     return filenames;
   }
   void Clipboard::capture(std::function<void()> const& lambda) {
     lambda_update_handler = lambda;
     
-    LPSTR CLASS_NAME = "Clipboard Window Class";
+    const wchar_t CLASS_NAME[] = L"Clipboard Window Class";
 
     HINSTANCE hInstance = GetModuleHandle(0);
     WNDCLASS wc = { };
@@ -120,7 +140,7 @@ namespace clipboard_auto {
     HWND hwnd = CreateWindowEx(
       0,                              // Optional window styles.
       CLASS_NAME,                     // Window class
-      "Clipboard Listener Windows",    // Window text
+      L"Clipboard Listener Windows",    // Window text
       WS_OVERLAPPEDWINDOW,            // Window style
       // Size and position
       CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
