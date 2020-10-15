@@ -76,7 +76,9 @@ namespace Clipboard {
     return info.Env().Undefined();
   }
   Napi::Value release(const Napi::CallbackInfo& info) {
+#if _WIN32 == 1
     PostThreadMessage(threadId, WM_QUIT, 0, 0);
+#endif
     tsfn.Release();
     return info.Env().Undefined();
   }

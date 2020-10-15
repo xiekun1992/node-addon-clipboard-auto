@@ -3,6 +3,8 @@
 #ifndef _NODE_ADDON_CLIPBOARD_AUTO
 #define _NODE_ADDON_CLIPBOARD_AUTO
 
+#if _WIN32 == 1
+
 #define UNICODE
 
 #include <thread>
@@ -14,6 +16,11 @@
 #include <shlobj.h>
 #include <windows.h>
 
+#elif __linux == 1
+
+#include <X11/extensions/Xfixes.h>
+
+#endif
 namespace clipboard_auto {
   class Clipboard {
     public:
