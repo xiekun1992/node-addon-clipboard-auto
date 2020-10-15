@@ -1,5 +1,11 @@
 const assert = require('assert');
+const os = require('os')
 const clipboardAuto = require('../index')
+
+if (os.platform() === 'linux' && !process.env.DISPLAY) {
+  console.log('npm test will not run on linux server') // 没有GUI环境导致SegmentFault错误
+  process.exit(0)
+}
 
 describe('clipboardAuto', () => {
   describe('text', () => {

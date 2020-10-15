@@ -107,8 +107,8 @@ namespace clipboard_auto {
     return false;
   }
   std::vector<std::u16string> Clipboard::read_files() {
-#if _WIN32 == 1
     std::vector<std::basic_string<char16_t>> filenames;
+#if _WIN32 == 1
     OpenClipboard(0);
 
     if (!IsClipboardFormatAvailable(CF_HDROP)) return filenames;
@@ -169,6 +169,7 @@ namespace clipboard_auto {
       }
     }
 #elif __linux == 1
+    notify = true;
     Display *display = XOpenDisplay(NULL);
     unsigned long color = BlackPixel(display, DefaultScreen(display));
     Window window = XCreateSimpleWindow(display, DefaultRootWindow(display), 0,0, 1,1, 0, color, color);
@@ -184,15 +185,16 @@ namespace clipboard_auto {
     XFixesSelectSelectionInput(display, DefaultRootWindow(display), bufid_clip, XFixesSetSelectionOwnerNotifyMask);
     XFixesSelectSelectionInput(display, DefaultRootWindow(display), bufid_pri, XFixesSetSelectionOwnerNotifyMask);
 
-    while (true) {
-      XNextEvent(display, &event);
-
-      if (
-        event.type == event_base + XFixesSelectionNotify && 
-        (((XFixesSelectionNotifyEvent*)&event)->selection == bufid_clip || ((XFixesSelectionNotifyEvent*)&event)->selection == bufid_pri)
-      ) {
-        printf("update\n");
-        lambda_update_handler();
+    while (notify) {
+      if (XPending(display)) {
+        XNextEvent(display, &event);
+        if (
+          event.type == event_base + XFixesSelectionNotify && 
+          (((XFixesSelectionNotifyEvent*)&event)->selection == bufid_clip || ((XFixesSelectionNotifyEvent*)&event)->selection == bufid_pri)
+        ) {
+          // printf("update\n");
+          lambda_update_handler();
+        }
       }
     }
 
@@ -201,6 +203,8 @@ namespace clipboard_auto {
 #endif
   }
   void Clipboard::release() {
-
+#if __linux == 1
+    notify = false;
+#endif
   }
 }

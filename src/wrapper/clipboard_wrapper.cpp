@@ -64,7 +64,9 @@ namespace Clipboard {
       thread.join();
     });
     thread = std::thread([]() {
+#if _WIN32 == 1
       threadId = GetCurrentThreadId();
+#endif
       auto callback = [](Napi::Env env, Napi::Function jsCallback) {
         jsCallback.Call({});
       };
@@ -78,6 +80,8 @@ namespace Clipboard {
   Napi::Value release(const Napi::CallbackInfo& info) {
 #if _WIN32 == 1
     PostThreadMessage(threadId, WM_QUIT, 0, 0);
+#elif __linux == 1
+    clipboard.release();
 #endif
     tsfn.Release();
     return info.Env().Undefined();

@@ -1,8 +1,5 @@
 const clipboardAuto = require('./build/Release/clipboard_auto.node')
-console.log(clipboardAuto.writeFiles([
-  'C:\\users'
-]))
-// console.log(clipboardAuto.writeText('a'))
+
 module.exports = {
   writeText(text) {
     return clipboardAuto.writeText(text)
