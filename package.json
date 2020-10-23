@@ -1,6 +1,6 @@
 {
   "name": "@xiekun1992/node-addon-clipboard-auto",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "",
   "main": "index.js",
   "scripts": {
