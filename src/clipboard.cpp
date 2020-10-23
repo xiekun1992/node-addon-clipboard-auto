@@ -196,6 +196,7 @@ namespace clipboard_auto {
           lambda_update_handler();
         }
       }
+      std::this_thread::sleep_for(std::chrono::milliseconds(1)); // prevent high cpu usage
     }
 
     XDestroyWindow(display, window);
